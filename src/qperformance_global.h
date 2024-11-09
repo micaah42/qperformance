@@ -1,0 +1,12 @@
+#ifndef QPERFORMANCE_GLOBAL_H
+#define QPERFORMANCE_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(QPERFORMANCE_LIBRARY)
+#define QPERFORMANCE_EXPORT Q_DECL_EXPORT
+#else
+#define QPERFORMANCE_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // QPERFORMANCE_GLOBAL_H
