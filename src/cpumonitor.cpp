@@ -47,7 +47,7 @@ CPUMonitor::CPUMonitor(QObject *parent)
     , _temperature{0}
 {
     this->setInterval(100);
-    this->onTimeout();
+    CPUMonitor::onTimeout();
 
     // Init Constant Properties like architecture and model name
 
@@ -60,7 +60,7 @@ CPUMonitor::CPUMonitor(QObject *parent)
 
     auto lines = procCpuInfo.readAll().split('\n');
 
-    for (auto const &line : qAsConst(lines)) {
+    for (auto const &line : std::as_const(lines)) {
         auto split = line.split(':');
 
         if (split.size() < 2) {
