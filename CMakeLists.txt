@@ -13,13 +13,25 @@ set(CMAKE_CXX_FLAGS "${CMAXE_CXX_FLAGS} -Wall -Werror")
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
-add_library(${PROJECT_NAME} SHARED
-    src/qperformance_global.h
-    src/cpumonitor.cpp
-    src/cpumonitor.h
-    src/monitor.cpp
-    src/monitor.h
+find_package(Qt6 REQUIRED COMPONENTS Quick)
+
+add_library(${PROJECT_NAME} SHARED)
+
+qt6_add_qml_module(${PROJECT_NAME}
+  URI QPerformance
+  VERSION 1.0
+  SOURCES
+  src/qperformance_global.h
+  src/cpumonitor.cpp
+  src/cpumonitor.h
+  src/monitor.cpp
+  src/monitor.h
+  src/performancechart.cpp
+  src/performancechart.h
 )
+
+
+target_link_libraries(qperformance PRIVATE Qt6::Quick)
 
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION})

@@ -38,9 +38,7 @@ public:
 signals:
     void coresChanged();
     void temperatureChanged();
-
     void totalChanged();
-
     void usagesChanged();
 
 private slots:
