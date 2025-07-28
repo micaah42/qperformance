@@ -2,8 +2,10 @@
 #define PERFORMANCECHART_H
 
 #include <QColor>
+#include <QElapsedTimer>
 #include <QImage>
 #include <QQuickPaintedItem>
+#include <QTimer>
 
 #include <deque>
 
@@ -24,6 +26,8 @@ class PerformanceChartBase : public QQuickPaintedItem
 
     Q_PROPERTY(double thickness READ thickness WRITE setThickness NOTIFY thicknessChanged FINAL)
 
+    Q_PROPERTY(int maxUpdateInterval READ maxUpdateInterval WRITE setMaxUpdateInterval NOTIFY maxUpdateIntervalChanged FINAL)
+
 public:
     PerformanceChartBase();
 
@@ -36,6 +40,9 @@ public:
     double thickness() const;
     void setThickness(double newThickness);
 
+    int maxUpdateInterval() const;
+    void setMaxUpdateInterval(int newMaxUpdateInterval);
+
 public slots:
     /**
      * @brief Adds new data values to the chart at the given timestamp.
@@ -43,7 +50,9 @@ public slots:
      * @param values A list of new values to append. Each entry corresponds to a different series.
      * @param t The timestamp associated with the new data (in milliseconds since epoch or arbitrary reference).
      */
-    virtual void newValues(const QList<double> &values, qint64 t) = 0;
+    virtual void pushValues2(const QList<double> &values, qint64 t) = 0;
+    void pushValues(const QList<double> &values);
+    void requestUpdate();
 
     /**
      * @brief Clears all existing data and resets the chart to an empty state.
@@ -56,13 +65,18 @@ signals:
 
     void thicknessChanged();
 
+    void maxUpdateIntervalChanged();
+
 protected:
-    QColor color(int i);
+    qint64 elapsedTime() const;
+    QColor color(int i) const;
 
 private:
     double _duration;
     QList<QColor> _colors;
     double _thickness;
+    QTimer _updateTimer;
+    QElapsedTimer _elapsedTimer;
 };
 
 /**
@@ -93,7 +107,7 @@ public:
     LongTimeChart();
 
 public slots:
-    virtual void newValues(const QList<double> &values, qint64 t) override;
+    virtual void pushValues2(const QList<double> &values, qint64 t) override;
     virtual void reset() override;
 
 protected:
@@ -117,7 +131,7 @@ public:
     PerformanceChart();
 
 public slots:
-    virtual void newValues(const QList<double> &values, qint64 t) override;
+    virtual void pushValues2(const QList<double> &values, qint64 t) override;
     virtual void reset() override;
 
 protected:

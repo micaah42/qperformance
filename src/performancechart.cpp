@@ -16,6 +16,13 @@ PerformanceChartBase::PerformanceChartBase()
 {
     connect(this, &QQuickItem::heightChanged, this, &PerformanceChartBase::reset);
     connect(this, &QQuickItem::widthChanged, this, &PerformanceChartBase::reset);
+
+    _updateTimer.callOnTimeout(this, [this]() { this->update(); });
+    _updateTimer.setTimerType(Qt::PreciseTimer);
+    _updateTimer.setSingleShot(true);
+    _updateTimer.setInterval(150);
+
+    _elapsedTimer.start();
 };
 
 LongTimeChart::LongTimeChart() {}
@@ -55,12 +62,12 @@ void LongTimeChart::paint(QPainter *painter)
     _image = newImage;
 }
 
-QColor PerformanceChartBase::color(int i)
+QColor PerformanceChartBase::color(int i) const
 {
     return _colors.empty() ? QColor{0, 0, 0} : _colors[i % _colors.size()];
 }
 
-void LongTimeChart::newValues(const QList<double> &values, qint64 t)
+void LongTimeChart::pushValues2(const QList<double> &values, qint64 t)
 {
     _prevValues = _values;
     _values = values;
@@ -68,7 +75,7 @@ void LongTimeChart::newValues(const QList<double> &values, qint64 t)
     _prevT = _t;
     _t = t;
 
-    this->update();
+    this->requestUpdate();
 }
 
 void LongTimeChart::reset()
@@ -107,7 +114,7 @@ void PerformanceChartBase::setColors(const QList<QColor> &newColors)
 
 PerformanceChart::PerformanceChart() {}
 
-void PerformanceChart::newValues(const QList<double> &values, qint64 t)
+void PerformanceChart::pushValues2(const QList<double> &values, qint64 t)
 {
     if (!_values.empty() && _values.back().size() != values.size()) {
         qCWarning(self) << "value size mismatch! resetting...";
@@ -123,14 +130,14 @@ void PerformanceChart::newValues(const QList<double> &values, qint64 t)
         _ts.pop_front();
     }
 
-    this->update();
+    this->requestUpdate();
 }
 
 void PerformanceChart::reset()
 {
     _values.clear();
     _ts.clear();
-    this->update();
+    this->requestUpdate();
 }
 
 void PerformanceChart::paint(QPainter *painter)
@@ -170,4 +177,33 @@ void PerformanceChartBase::setThickness(double newThickness)
 
     _thickness = newThickness;
     emit thicknessChanged();
+}
+
+int PerformanceChartBase::maxUpdateInterval() const
+{
+    return _updateTimer.interval();
+}
+
+void PerformanceChartBase::setMaxUpdateInterval(int newMaxUpdateInterval)
+{
+    if (_updateTimer.interval() == newMaxUpdateInterval)
+        return;
+    _updateTimer.setInterval(newMaxUpdateInterval);
+    emit maxUpdateIntervalChanged();
+}
+
+void PerformanceChartBase::pushValues(const QList<double> &values)
+{
+    this->pushValues2(values, _elapsedTimer.elapsed());
+}
+
+void PerformanceChartBase::requestUpdate()
+{
+    if (!_updateTimer.isActive())
+        _updateTimer.start();
+}
+
+qint64 PerformanceChartBase::elapsedTime() const
+{
+    return _elapsedTimer.elapsed();
 }
