@@ -2,15 +2,48 @@
 #define CPUMONITOR_H
 
 #include <QObject>
+#include <QQmlEngine>
 #include <QTimer>
 
 #include "monitor.h"
 
-class CPUCore;
+class CPUCore : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
+
+    Q_PROPERTY(QString name READ name CONSTANT)
+    Q_PROPERTY(double load READ load WRITE setLoad NOTIFY loadChanged)
+
+public:
+    explicit CPUCore(const QString &name = "", QObject *parent = nullptr);
+
+    const QString &name() const;
+    double load() const;
+
+signals:
+    void loadChanged();
+
+protected:
+    quint64 _totalTime;
+    quint64 _activeTime;
+
+protected slots:
+    void setLoad(double newLoad);
+
+private:
+    double _load;
+    QString _name;
+
+    friend class CPUMonitor;
+};
 
 class CPUMonitor : public Monitor
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
 
     Q_PROPERTY(QString architecture READ architecture CONSTANT)
     Q_PROPERTY(QString model READ model CONSTANT)
@@ -52,34 +85,5 @@ private:
     QString _model;
     QString _vendor;
     QList<double> _usages;
-};
-
-class CPUCore : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QString name READ name CONSTANT)
-    Q_PROPERTY(double load READ load WRITE setLoad NOTIFY loadChanged)
-
-public:
-    explicit CPUCore(const QString &name = "", QObject *parent = nullptr);
-
-    const QString &name() const;
-    double load() const;
-
-signals:
-    void loadChanged();
-
-protected:
-    quint64 _totalTime;
-    quint64 _activeTime;
-
-protected slots:
-    void setLoad(double newLoad);
-
-private:
-    double _load;
-    QString _name;
-
-    friend class CPUMonitor;
 };
 #endif // CPUMONITOR_H
