@@ -5,7 +5,7 @@
 #include <QQmlEngine>
 #include <QTimer>
 
-#include "monitor.h"
+#include "pollingmonitor.h"
 
 class CPUCore : public QObject
 {
@@ -39,7 +39,7 @@ private:
     friend class CPUMonitor;
 };
 
-class CPUMonitor : public Monitor
+class CPUMonitor : public PollingMonitor
 {
     Q_OBJECT
     QML_ELEMENT
@@ -85,5 +85,6 @@ private:
     QString _model;
     QString _vendor;
     QList<double> _usages;
+    QMap<QByteArray, QByteArray> _cpuinfo;
 };
 #endif // CPUMONITOR_H

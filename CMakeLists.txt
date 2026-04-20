@@ -10,25 +10,30 @@ set(CMAKE_CXX_FLAGS "${CMAXE_CXX_FLAGS} -Wall -Werror")
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Quick Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Quick Core)
 
+file(GLOB_RECURSE SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.h
+)
+
+file(GLOB_RECURSE QML_FILES
+    RELATIVE ${CMAKE_CURRENT_LIST_DIR}
+    QPerformanceQml/*.qml
+)
+
+set(QML_SINGLETONS
+    QPerformanceQml/Style.qml
+)
+
+set_source_files_properties(${QML_SINGLETONS}
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
 qt_add_library(${PROJECT_NAME} STATIC)
 
 qt_add_qml_module(${PROJECT_NAME}
-  URI QPerformanceQml
-
-  SOURCES
-  src/qperformance_global.h
-
-  src/cpumonitor.cpp
-  src/cpumonitor.h
-
-  src/monitor.cpp
-  src/monitor.h
-
-  src/performancechart.cpp
-  src/performancechart.h
-
-  src/cpugraph.cpp
-  src/cpugraph.h
+    QML_FILES ${QML_FILES}
+    SOURCES ${SOURCES}
+    URI QPerformanceQml
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

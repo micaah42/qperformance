@@ -6,110 +6,7 @@
 #include <QQuickItemGrabResult>
 
 namespace {
-Q_LOGGING_CATEGORY(self, "performancechart")
-}
-
-PerformanceChartBase::PerformanceChartBase()
-    : _duration{5000}
-    , _colors{Qt::white}
-    , _thickness{2.}
-{
-    connect(this, &QQuickItem::heightChanged, this, &PerformanceChartBase::reset);
-    connect(this, &QQuickItem::widthChanged, this, &PerformanceChartBase::reset);
-
-    _updateTimer.callOnTimeout(this, [this]() { this->update(); });
-    _updateTimer.setTimerType(Qt::PreciseTimer);
-    _updateTimer.setSingleShot(true);
-    _updateTimer.setInterval(150);
-
-    _elapsedTimer.start();
-};
-
-LongTimeChart::LongTimeChart() {}
-
-void LongTimeChart::paint(QPainter *painter)
-{
-    if (_prevValues.size() != _values.size()) {
-        qCWarning(self) << "value size mismatch!";
-        return;
-    }
-
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    double pxPerMs = this->width() / (double) this->duration();
-    double pxPerPercent = this->height() / 100.;
-    double changedPx = pxPerMs * (_t - _prevT);
-
-    QImage newImage(width(), height(), QImage::Format_ARGB32_Premultiplied);
-    newImage.fill(Qt::transparent);
-
-    QPainter pp{&newImage};
-    pp.setRenderHint(QPainter::Antialiasing);
-
-    QRectF target{0, 0, width() - changedPx, height()};
-    QRectF source{changedPx, 0, width() - changedPx, height()};
-    pp.drawImage(target, _image, source);
-
-    for (int i = 0; i < _values.size(); ++i) {
-        QPointF from{this->width() - changedPx, this->height() - pxPerPercent * _prevValues[i]};
-        QPointF to{this->width(), this->height() - pxPerPercent * _values[i]};
-        QPen pen{this->color(i), this->thickness(), Qt::SolidLine, Qt::RoundCap};
-        pp.setPen(pen);
-        pp.drawLine(from, to);
-    }
-
-    painter->drawImage(_image.rect(), newImage, _image.rect());
-    _image = newImage;
-}
-
-QColor PerformanceChartBase::color(int i) const
-{
-    return _colors.empty() ? QColor{0, 0, 0} : _colors[i % _colors.size()];
-}
-
-void LongTimeChart::pushValues2(const QList<double> &values, qint64 t)
-{
-    _prevValues = _values;
-    _values = values;
-
-    _prevT = _t;
-    _t = t;
-
-    this->requestUpdate();
-}
-
-void LongTimeChart::reset()
-{
-    _image = QImage{QSize(this->width(), this->height()), QImage::Format_ARGB32_Premultiplied};
-    _image.fill(Qt::transparent);
-}
-
-double PerformanceChartBase::duration() const
-{
-    return _duration;
-}
-
-void PerformanceChartBase::setDuration(double newDuration)
-{
-    if (_duration == newDuration)
-        return;
-
-    _duration = newDuration;
-    emit durationChanged();
-}
-
-const QList<QColor> &PerformanceChartBase::colors() const
-{
-    return _colors;
-}
-
-void PerformanceChartBase::setColors(const QList<QColor> &newColors)
-{
-    if (_colors == newColors)
-        return;
-
-    _colors = newColors;
-    emit colorsChanged();
+Q_LOGGING_CATEGORY(self, "qperformance.chart")
 }
 
 PerformanceChart::PerformanceChart() {}
@@ -147,63 +44,37 @@ void PerformanceChart::paint(QPainter *painter)
 
     painter->setRenderHint(QPainter::Antialiasing);
 
-    double pxPerMs = this->width() / (double) this->duration();
-    double pxPerPercent = this->height() / 100.;
+    if (this->max() == this->min())
+        return;
+
+    double ft = this->width() / (double) this->duration();
+    double yf = 1. / (this->max() - this->min());
 
     qint64 now = _ts.back();
     int n = _values.front().size();
 
     for (int j = 0; j < n; j++) {
-        QPen pen{this->color(j), this->thickness(), Qt::SolidLine, Qt::RoundCap};
+        auto color = this->color(j);
+        auto lineWidth = this->lineWidth(j);
+
+        if (color.alpha() == 0 || lineWidth == 0)
+            continue;
+
+        QPen pen{color, lineWidth, Qt::SolidLine, Qt::RoundCap};
         painter->setPen(pen);
 
         for (size_t i = 1; i < _ts.size(); i++) {
-            QPointF from{this->width() - pxPerMs * (now - _ts[i]), this->height() - pxPerPercent * _values[i][j]};
-            QPointF to{this->width() - pxPerMs * (now - _ts[i - 1]), this->height() - pxPerPercent * _values[i - 1][j]};
+            double y1 = (_values[i][j] - this->min()) * yf;
+            double y2 = (_values[i - 1][j] - this->min()) * yf;
+            QPointF from{
+                this->width() - ft * (now - _ts[i]),
+                this->height() * (1 - y1),
+            };
+            QPointF to{
+                this->width() - ft * (now - _ts[i - 1]),
+                this->height() * (1 - y2),
+            };
             painter->drawLine(from, to);
         }
     }
-}
-
-double PerformanceChartBase::thickness() const
-{
-    return _thickness;
-}
-
-void PerformanceChartBase::setThickness(double newThickness)
-{
-    if (qFuzzyCompare(_thickness, newThickness))
-        return;
-
-    _thickness = newThickness;
-    emit thicknessChanged();
-}
-
-int PerformanceChartBase::maxUpdateInterval() const
-{
-    return _updateTimer.interval();
-}
-
-void PerformanceChartBase::setMaxUpdateInterval(int newMaxUpdateInterval)
-{
-    if (_updateTimer.interval() == newMaxUpdateInterval)
-        return;
-    _updateTimer.setInterval(newMaxUpdateInterval);
-    emit maxUpdateIntervalChanged();
-}
-
-void PerformanceChartBase::pushValues(const QList<double> &values)
-{
-    this->pushValues2(values, _elapsedTimer.elapsed());
-}
-
-void PerformanceChartBase::requestUpdate()
-{
-    if (!_updateTimer.isActive())
-        _updateTimer.start();
-}
-
-qint64 PerformanceChartBase::elapsedTime() const
-{
-    return _elapsedTimer.elapsed();
 }

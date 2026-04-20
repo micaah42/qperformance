@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QLoggingCategory>
 
+#include "utility.h"
+
 #ifdef Q_PROCESSOR_X86_64
 #define ARCHITECTURE "x86_64"
 #elif defined(Q_PROCESSOR_ARM)
@@ -12,7 +14,7 @@
 #endif
 
 namespace {
-Q_LOGGING_CATEGORY(self, "cpu", QtInfoMsg);
+Q_LOGGING_CATEGORY(self, "qperformance.cpu", QtInfoMsg);
 }
 
 CPUCore::CPUCore(const QString &name, QObject *parent)
@@ -43,13 +45,11 @@ void CPUCore::setLoad(double newLoad)
 }
 
 CPUMonitor::CPUMonitor(QObject *parent)
-    : Monitor{parent}
+    : PollingMonitor{parent}
     , _temperature{0}
+    , _architecture{ARCHITECTURE}
 {
-    this->setInterval(100);
     CPUMonitor::onTimeout();
-
-    // Init Constant Properties like architecture and model name
 
     QFile procCpuInfo{"/proc/cpuinfo"};
 
@@ -58,25 +58,15 @@ CPUMonitor::CPUMonitor(QObject *parent)
         return;
     }
 
-    auto lines = procCpuInfo.readAll().split('\n');
+    auto bytes = procCpuInfo.readAll();
+    _cpuinfo = utility::parseMap(bytes);
+    _vendor = _cpuinfo["vendor_id"];
 
-    for (auto const &line : std::as_const(lines)) {
-        auto split = line.split(':');
+    _model = _cpuinfo["model name"];
 
-        if (split.size() < 2) {
-            continue;
-        }
+    if (_model.isEmpty())
+        _model = _cpuinfo["Model"];
 
-        auto key = split[0];
-        auto value = split.mid(1).join(':');
-
-        if (key.startsWith("vendor_id"))
-            _vendor = value.simplified();
-        else if (key.startsWith("model name"))
-            _model = value.simplified();
-    }
-
-    _architecture = ARCHITECTURE;
     qCInfo(self) << "initialized monitor" << this;
 }
 
@@ -147,6 +137,7 @@ void CPUMonitor::onTimeout()
         _usages.append(core->load());
     }
 
+    emit valuesAvailable(_usages);
     emit usagesChanged();
 
     if (coresAdded) {
