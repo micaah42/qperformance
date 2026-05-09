@@ -9,6 +9,7 @@
 class PerformanceChartBase : public QQuickPaintedItem
 {
     Q_OBJECT
+    QML_ELEMENT
     QML_UNCREATABLE("PerformanceChartBase is Abstract")
 
     /**
@@ -21,6 +22,9 @@ class PerformanceChartBase : public QQuickPaintedItem
      */
     Q_PROPERTY(QList<QColor> colors READ colors WRITE setColors NOTIFY colorsChanged FINAL)
 
+    /**
+     * @brief List of line widths used to render multiple data series.
+     */
     Q_PROPERTY(QList<double> lineWidths READ lineWidths WRITE setLineWidths NOTIFY lineWidthsChanged FINAL)
 
     /**
@@ -30,6 +34,9 @@ class PerformanceChartBase : public QQuickPaintedItem
 
     Q_PROPERTY(double min READ min WRITE setMin NOTIFY minChanged FINAL)
     Q_PROPERTY(double max READ max WRITE setMax NOTIFY maxChanged FINAL)
+
+    Q_PROPERTY(double minValue READ minValue WRITE setMinValue NOTIFY minValueChanged FINAL)
+    Q_PROPERTY(double maxValue READ maxValue WRITE setMaxValue NOTIFY maxValueChanged FINAL)
 
     Q_PROPERTY(Monitor *monitor READ monitor WRITE setMonitor NOTIFY monitorChanged FINAL)
 
@@ -61,6 +68,12 @@ public:
     Monitor *monitor() const;
     void setMonitor(Monitor *newMonitor);
 
+    double maxValue() const;
+    void setMaxValue(double newMaxValue);
+
+    double minValue() const;
+    void setMinValue(double newMinValue);
+
 public slots:
     /**
      * @brief Adds new data values to the chart at the given timestamp.
@@ -85,6 +98,8 @@ signals:
     void minChanged();
     void maxChanged();
     void monitorChanged();
+    void maxValueChanged();
+    void minValueChanged();
 
 protected:
     qint64 elapsedTime() const;
@@ -102,6 +117,8 @@ private:
     QTimer _updateTimer;
     QElapsedTimer _elapsedTimer;
     QPointer<Monitor> _monitor;
+    double _maxValue;
+    double _minValue;
 };
 
 #endif // PERFORMANCECHARTBASE_H

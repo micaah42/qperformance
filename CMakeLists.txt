@@ -49,10 +49,15 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
 )
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Quick
     Qt6::Core
 )
 
+include(CTest)
+if (BUILD_TESTING)
+    add_subdirectory(tests/)
+endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)

@@ -62,6 +62,7 @@ ColumnLayout {
                 anchors.fill: parent
                 monitor: FPSMonitor
                 colors: root.colors
+                duration: 2500
                 max: 120
             }
         }

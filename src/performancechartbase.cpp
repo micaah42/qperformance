@@ -12,6 +12,8 @@ PerformanceChartBase::PerformanceChartBase()
     , _duration{5000}
     , _colors{Qt::white}
     , _lineWidths{1.}
+    , _maxValue{-std::numeric_limits<double>::infinity()}
+    , _minValue{+std::numeric_limits<double>::infinity()}
 {
     connect(this, &QQuickItem::heightChanged, this, &PerformanceChartBase::reset);
     connect(this, &QQuickItem::widthChanged, this, &PerformanceChartBase::reset);
@@ -19,7 +21,7 @@ PerformanceChartBase::PerformanceChartBase()
     _updateTimer.callOnTimeout(this, [this]() { this->update(); });
     _updateTimer.setTimerType(Qt::PreciseTimer);
     _updateTimer.setSingleShot(true);
-    _updateTimer.setInterval(150);
+    _updateTimer.setInterval(250);
 }
 
 PerformanceChartBase::~PerformanceChartBase()
@@ -161,4 +163,30 @@ void PerformanceChartBase::setMonitor(Monitor *newMonitor)
         connect(_monitor, &Monitor::valuesAvailable, this, &PerformanceChartBase::pushValues);
         _monitor->subscribe(this);
     }
+}
+
+double PerformanceChartBase::maxValue() const
+{
+    return _maxValue;
+}
+
+void PerformanceChartBase::setMaxValue(double newMaxValue)
+{
+    if (qFuzzyCompare(_maxValue, newMaxValue))
+        return;
+    _maxValue = newMaxValue;
+    emit maxValueChanged();
+}
+
+double PerformanceChartBase::minValue() const
+{
+    return _minValue;
+}
+
+void PerformanceChartBase::setMinValue(double newMinValue)
+{
+    if (qFuzzyCompare(_minValue, newMinValue))
+        return;
+    _minValue = newMinValue;
+    emit minValueChanged();
 }

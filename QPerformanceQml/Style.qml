@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    property real fontPxLarge: 22
-    property real fontPxSmall: 18
+    property real fontPxLarge: 18
+    property real fontPxSmall: 14
 
     property real chartHeight: 120
     property string fontFamily: Qt.font({}).family

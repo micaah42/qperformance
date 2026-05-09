@@ -8,6 +8,8 @@ Item {
 
     property color backgroundColor: Qt.rgba(0.24, 0.24, 0.24, 0.84)
     property alias dialog: dialog
+    signal closeRequested
+    signal dragStopped
     height: dialog.height
     width: 280
 
@@ -19,23 +21,45 @@ Item {
         closePolicy: Popup.NoAutoClose
         width: root.width
         parent: root
-        visible: true
         dim: false
         padding: 8
         z: 10
 
         contentItem: Item {
             implicitHeight: column.implicitHeight
-
+            MouseArea {
+                id: mover
+                anchors.fill: parent
+                drag.target: root
+                onReleased: root.dragStopped()
+            }
             ColumnLayout {
                 id: column
                 width: parent.width
 
-                Label {
-                    Layout.fillWidth: true
-                    text: 'Performance (FPS, CPU, Memory)'
-                    font.pixelSize: Style.fontPxLarge
-                    font.family: Style.fontFamily
+                RowLayout {
+                    Label {
+                        id: label
+                        Layout.fillWidth: true
+                        text: 'Performance'
+                        font.pixelSize: Style.fontPxLarge
+                        font.family: Style.fontFamily
+                    }
+                    Button {
+                        Layout.preferredHeight: label.height
+                        font.pixelSize: Style.fontPxSmall
+                        font.family: Style.fontFamily
+                        bottomPadding: 0
+                        bottomInset: 0
+                        topPadding: 0
+                        topInset: 0
+
+                        onClicked: {
+                            root.closeRequested()
+                            dialog.close()
+                        }
+                        text: 'Close'
+                    }
                 }
 
                 Loader {
@@ -45,17 +69,10 @@ Item {
 
                     sourceComponent: PerformanceDisplay {
                         id: performanceDisplay
-                        showHeaders: false
                         chartHeight: 96
                         spacing: 16
                     }
                 }
-            }
-
-            MouseArea {
-                id: mover
-                anchors.fill: parent
-                drag.target: root
             }
         }
     }

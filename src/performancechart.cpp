@@ -53,6 +53,9 @@ void PerformanceChart::paint(QPainter *painter)
     qint64 now = _ts.back();
     int n = _values.front().size();
 
+    double newMin = +std::numeric_limits<double>::infinity();
+    double newMax = -std::numeric_limits<double>::infinity();
+
     for (int j = 0; j < n; j++) {
         auto color = this->color(j);
         auto lineWidth = this->lineWidth(j);
@@ -63,8 +66,24 @@ void PerformanceChart::paint(QPainter *painter)
         QPen pen{color, lineWidth, Qt::SolidLine, Qt::RoundCap};
         painter->setPen(pen);
 
+        if (_values[0][j] < newMin)
+            newMin = _values[0][j];
+        if (_values[0][j] > newMax)
+            newMax = _values[0][j];
+
+        auto valuesIt = _values.begin();
+        valuesIt++;
+        auto tIt = _ts.begin();
+        tIt++;
+
         for (size_t i = 1; i < _ts.size(); i++) {
-            double y1 = (_values[i][j] - this->min()) * yf;
+            double v = (*valuesIt)[j];
+            if (v < newMin)
+                newMin = v;
+            if ((*valuesIt)[j] > newMax)
+                newMax = v;
+
+            double y1 = (v - this->min()) * yf;
             double y2 = (_values[i - 1][j] - this->min()) * yf;
             QPointF from{
                 this->width() - ft * (now - _ts[i]),
@@ -75,6 +94,12 @@ void PerformanceChart::paint(QPainter *painter)
                 this->height() * (1 - y2),
             };
             painter->drawLine(from, to);
+
+            valuesIt++;
+            tIt++;
         }
     }
+
+    this->setMinValue(newMin);
+    this->setMaxValue(newMax);
 }
