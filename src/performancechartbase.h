@@ -1,6 +1,7 @@
 #ifndef PERFORMANCECHARTBASE_H
 #define PERFORMANCECHARTBASE_H
 
+#include <QElapsedTimer>
 #include <QQuickPaintedItem>
 #include <QTimer>
 
