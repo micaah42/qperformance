@@ -1,6 +1,7 @@
 #ifndef FPSMONITOR_H
 #define FPSMONITOR_H
 
+#include <QElapsedTimer>
 #include <QObject>
 #include <QQmlEngine>
 #include <QQuickWindow>
