@@ -3,7 +3,7 @@
 #include <QLoggingCategory>
 
 namespace {
-Q_LOGGING_CATEGORY(self, "qperformance.chartbase")
+Q_LOGGING_CATEGORY(self, "qperformance.chartbase", QtWarningMsg)
 }
 
 PerformanceChartBase::PerformanceChartBase()

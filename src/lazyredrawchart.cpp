@@ -4,7 +4,7 @@
 #include <QPainter>
 
 namespace {
-Q_LOGGING_CATEGORY(self, "qperformance.lazychart")
+Q_LOGGING_CATEGORY(self, "qperformance.lazychart", QtWarningMsg)
 }
 
 LazyRedrawChart::LazyRedrawChart() {}

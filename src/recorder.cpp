@@ -5,7 +5,7 @@
 #include <QtConcurrent/QtConcurrent>
 
 namespace {
-Q_LOGGING_CATEGORY(self, "qperformance.recorder")
+Q_LOGGING_CATEGORY(self, "qperformance.recorder", QtWarningMsg)
 }
 
 const unsigned char QPerfDataPointsMagicData[]{

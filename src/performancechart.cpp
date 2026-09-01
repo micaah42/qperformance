@@ -6,7 +6,7 @@
 #include <QQuickItemGrabResult>
 
 namespace {
-Q_LOGGING_CATEGORY(self, "qperformance.chart")
+Q_LOGGING_CATEGORY(self, "qperformance.chart", QtWarningMsg)
 }
 
 PerformanceChart::PerformanceChart() {}

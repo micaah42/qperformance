@@ -4,7 +4,7 @@
 #include <QLoggingCategory>
 
 namespace {
-Q_LOGGING_CATEGORY(self, "cpugraph")
+Q_LOGGING_CATEGORY(self, "cpugraph", QtWarningMsg)
 }
 
 CPUGraph::CPUGraph() {}
