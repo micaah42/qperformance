@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Michael Wipplinger (micaah42)
+#
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
 cmake_minimum_required(VERSION 3.22)
 
 project(qperformance LANGUAGES CXX VERSION 2.0)

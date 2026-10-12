@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Michael Wipplinger (micaah42)
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 #ifndef LAZYREDRAWCHART_H
 #define LAZYREDRAWCHART_H
 

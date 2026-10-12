@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2026 micaah42
+SPDX-FileCopyrightText: 2026 Michael Wipplinger (micaah42)
 
 SPDX-License-Identifier: LGPL-3.0-or-later
 -->
