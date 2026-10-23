@@ -6,10 +6,13 @@
 #define MONITOR_H
 
 #include <QObject>
+#include <QQmlEngine>
 
 class Monitor : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+
     Q_PROPERTY(bool active READ active NOTIFY activeChanged FINAL)
 
 public:

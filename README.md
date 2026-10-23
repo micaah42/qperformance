@@ -83,6 +83,8 @@ The QML module URI is `QPerformanceQml`. Import it in QML with
   temperature when the Linux thermal-zone file is available.
 - `MemoryMonitor`: memory and swap capacity, available/free amounts, and
   usage.
+- `NetworkMonitor`: receive (rx) and transmit (tx) network speeds and byte
+  counters for a specific interface or all discovered interfaces.
 - `FPSMonitor`: current and average frame rate for a `QQuickWindow`.
 
 Planned monitors:
